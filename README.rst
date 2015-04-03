@@ -12,12 +12,8 @@ people) for inefficiently using Emacs.
 Installation
 ------------
 
-Install via `Quelpa <https://github.com/quelpa/quelpa>`_ with the
-following:
-
-.. code:: cl
-
-    (quelpa '(jammer :fetcher github :repo "wasamasa/jammer"))
+Install from `Marmalade <https://marmalade-repo.org/>`_ with ``M-x
+package-install RET jammer RET``.
 
 Usage
 -----

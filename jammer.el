@@ -202,6 +202,7 @@ The general behaviour is determined by `jammer-type'."
                       jammer-random-delay))
         (discard-input))))))
 
+;;;###autoload
 (define-minor-mode jammer-mode
   "Toggle `jammer-mode'.
 This global minor mode allows you to slow down command execution

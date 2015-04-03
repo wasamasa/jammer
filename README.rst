@@ -70,6 +70,7 @@ This package is heavily inspired by `vim-molasses
 `vim-hardtime <https://github.com/takac/vim-hardtime>`_ which is
 inspired by `hardmode <https://github.com/wikitopian/hardmode>`_.
 
-I'm not aware of any Emacs alternatives, but both `annoying-arrows-mode
-<https://github.com/magnars/annoying-arrows-mode.el>`_ and `guru-mode
+I'm not aware of any Emacs alternatives, but `annoying-arrows-mode
+<https://github.com/magnars/annoying-arrows-mode.el>`_, `hardcore-mode
+<https://github.com/magnars/hardcore-mode.el>`_ and `guru-mode
 <https://github.com/bbatsov/guru-mode>`_ come somewhat close.

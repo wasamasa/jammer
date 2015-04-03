@@ -74,3 +74,20 @@ I'm not aware of any Emacs alternatives, but `annoying-arrows-mode
 <https://github.com/magnars/annoying-arrows-mode.el>`_, `hardcore-mode
 <https://github.com/magnars/hardcore-mode.el>`_ and `guru-mode
 <https://github.com/bbatsov/guru-mode>`_ come somewhat close.
+
+Motivation
+----------
+
+Some people believe rate-limiting their bad keyboard habits is the way
+to go.  Though, this belief seems to be rather linked to Vim, not
+Emacs.  I intended to find out how hard it is to achieve this goal
+programmatically, however I've learned about a much more interesting
+thing, compatibility of post-command sleep with other Emacs packages.
+If used on its own, the package works surprisingly well, adding extra
+packages however can make the experience worse.
+
+In other words, this package is not only an elaborate joke, but can be
+used as test for your own packages hooking into Emacs' command loop,
+be it by using ``post-command-hook`` or using timers for anything more
+complex than keeping track of your oven.  If they behave as expected
+with it enabled, chances are their handling of input is robust enough.

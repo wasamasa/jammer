@@ -12,8 +12,8 @@ people) for inefficiently using Emacs.
 Installation
 ------------
 
-Install from `Marmalade <https://marmalade-repo.org/>`_ with ``M-x
-package-install RET jammer RET``.
+Install from `Marmalade <https://marmalade-repo.org/>`_ or `MELPA
+<http://melpa.org/>`_ with ``M-x package-install RET jammer RET``.
 
 Usage
 -----

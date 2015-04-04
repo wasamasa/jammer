@@ -160,8 +160,7 @@ The general behaviour is determined by `jammer-type'."
 
 (defun jammer-repeat ()
   "Jam after repeated key strokes."
-  (let ((window (- (float-time) (aref jammer-repeat-state 2)))
-        (delay (jammer-repeat-delay jammer-repeat-type)))
+  (let ((window (- (float-time) (aref jammer-repeat-state 2))))
     ;; did a different key event happen or enough time pass?
     (if (or (not (equal (this-command-keys-vector)
                         (aref jammer-repeat-state 0)))
@@ -175,11 +174,7 @@ The general behaviour is determined by `jammer-type'."
     (when (and (>= (aref jammer-repeat-state 1)
                    jammer-repeat-allowed-repetitions)
                (< window jammer-repeat-window))
-      ;; `sleep-for' does uninterruptable sleep without display update,
-      ;; `discard-input' throws away piled up input from that
-      ;; sleeping time
-      (sleep-for delay)
-      (discard-input)))
+      (jammer-delay (jammer-repeat-delay jammer-repeat-type))))
   ;; do book keeping for the next command
   (aset jammer-repeat-state 0 (this-command-keys-vector))
   (aset jammer-repeat-state 2 (float-time)))
@@ -205,8 +200,7 @@ value is interpreted as a delay of zero."
 (defun jammer-constant ()
   "Jam a constant time.
 See `jammer-constant-delay' for the tunable."
-  (sleep-for jammer-constant-delay)
-  (discard-input))
+  (jammer-delay jammer-constant-delay))
 
 (defun jammer-random ()
   "Jam for a random time.
@@ -216,9 +210,15 @@ and `jammer-random-delay' for tunables."
   (when (= (random (floor (/ 1 (min jammer-random-maximum-probability
                                     (max jammer-random-minimum-probability
                                          jammer-random-probability))))) 0)
-    (sleep-for (* (random (1+ jammer-random-amplification))
-                  jammer-random-delay))
-    (discard-input)))
+    (jammer-delay (* (random (1+ jammer-random-amplification))
+                     jammer-random-delay))))
+
+(defun jammer-delay (time)
+  "Sleep for TIME, discard any input made in that time.
+Returns a truthy value after sleep."
+  (sleep-for time)
+  (discard-input)
+  t)
 
 ;;;###autoload
 (define-minor-mode jammer-mode

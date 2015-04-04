@@ -75,9 +75,9 @@ The behaviour is set by `jammer-block-type'."
 (defcustom jammer-repeat-type 'constant
   "Type of slowdown.
 
-'constant: Constant delay.
+'constant:  Constant delay.
 
-'linear:  Delay increases by repetition count.
+'linear:    Delay increases by repetition count.
 
 'quadratic: Delay increases by repetition count squared."
   :type '(choice (const :tag "Constant" constant)
@@ -152,55 +152,73 @@ The general behaviour is determined by `jammer-type'."
                  (memq this-command jammer-block-list)))
     (cond
      ((eq jammer-type 'repeat)
-      (let ((window (- (float-time) (aref jammer-repeat-state 2)))
-            ;; use constant, linear, quadratic or no delay in the
-            ;; erroneous customization case, similiar to the no-op done
-            ;; if no known jammer type is enabled
-            (delay (or (cond
-                        ((eq jammer-repeat-type 'constant)
-                         jammer-repeat-delay)
-                        ((eq jammer-repeat-type 'linear)
-                         (* (- (aref jammer-repeat-state 1)
-                               jammer-repeat-allowed-repetitions)
-                            jammer-repeat-delay))
-                        ((eq jammer-repeat-type 'quadratic)
-                         (* (expt (- (aref jammer-repeat-state 1)
-                                     jammer-repeat-allowed-repetitions)
-                                  2)
-                            jammer-repeat-delay))) 0)))
-        ;; did a different key event happen or enough time pass?
-        (if (or (not (equal (this-command-keys-vector)
-                            (aref jammer-repeat-state 0)))
-                (> window jammer-repeat-window))
-            ;; if yes, reset the counter
-            (aset jammer-repeat-state 1 0)
-          ;; otherwise increment it
-          (aset jammer-repeat-state 1 (1+ (aref jammer-repeat-state 1))))
-        ;; if too little time passed, sleep for the delay calculated
-        ;; earlier
-        (when (and (>= (aref jammer-repeat-state 1)
-                       jammer-repeat-allowed-repetitions)
-                   (< window jammer-repeat-window))
-          ;; `sleep-for' does uninterruptable sleep without display update,
-          ;; `discard-input' throws away piled up input from that
-          ;; sleeping time
-          (sleep-for delay)
-          (discard-input)))
-      ;; do book keeping for the next command
-      (aset jammer-repeat-state 0 (this-command-keys-vector))
-      (aset jammer-repeat-state 2 (float-time)))
+      (jammer-repeat))
      ((eq jammer-type 'constant)
-      (sleep-for jammer-constant-delay)
-      (discard-input))
+      (jammer-constant))
      ((eq jammer-type 'random)
-      ;; the random function simulates a rare event and amplifies its
-      ;; extent randomly
-      (when (= (random (floor (/ 1 (min jammer-random-maximum-probability
-                                        (max jammer-random-minimum-probability
-                                             jammer-random-probability))))) 0)
-        (sleep-for (* (random (1+ jammer-random-amplification))
-                      jammer-random-delay))
-        (discard-input))))))
+      (jammer-random)))))
+
+(defun jammer-repeat ()
+  "Jam after repeated key strokes."
+  (let ((window (- (float-time) (aref jammer-repeat-state 2)))
+        (delay (jammer-repeat-delay jammer-repeat-type)))
+    ;; did a different key event happen or enough time pass?
+    (if (or (not (equal (this-command-keys-vector)
+                        (aref jammer-repeat-state 0)))
+            (> window jammer-repeat-window))
+        ;; if yes, reset the counter
+        (aset jammer-repeat-state 1 0)
+      ;; otherwise increment it
+      (aset jammer-repeat-state 1 (1+ (aref jammer-repeat-state 1))))
+    ;; if too little time passed, sleep for the delay calculated
+    ;; earlier
+    (when (and (>= (aref jammer-repeat-state 1)
+                   jammer-repeat-allowed-repetitions)
+               (< window jammer-repeat-window))
+      ;; `sleep-for' does uninterruptable sleep without display update,
+      ;; `discard-input' throws away piled up input from that
+      ;; sleeping time
+      (sleep-for delay)
+      (discard-input)))
+  ;; do book keeping for the next command
+  (aset jammer-repeat-state 0 (this-command-keys-vector))
+  (aset jammer-repeat-state 2 (float-time)))
+
+(defun jammer-repeat-delay (type)
+  "Calculate the delay depending on TYPE.
+See `jammer-repeat-type' for valid values of TYPE.  Any other
+value is interpreted as a delay of zero."
+  (cond
+   ((eq type 'constant)
+    jammer-repeat-delay)
+   ((eq type 'linear)
+    (* (- (aref jammer-repeat-state 1)
+          jammer-repeat-allowed-repetitions)
+       jammer-repeat-delay))
+   ((eq type 'quadratic)
+    (* (expt (- (aref jammer-repeat-state 1)
+                jammer-repeat-allowed-repetitions)
+             2)
+       jammer-repeat-delay))
+   (t 0)))
+
+(defun jammer-constant ()
+  "Jam a constant time.
+See `jammer-constant-delay' for the tunable."
+  (sleep-for jammer-constant-delay)
+  (discard-input))
+
+(defun jammer-random ()
+  "Jam for a random time.
+See `jammer-random-probability', `jammer-random-amplification'
+and `jammer-random-delay' for tunables."
+  ;; this function simulates a rare event, then amplifies it randomly
+  (when (= (random (floor (/ 1 (min jammer-random-maximum-probability
+                                    (max jammer-random-minimum-probability
+                                         jammer-random-probability))))) 0)
+    (sleep-for (* (random (1+ jammer-random-amplification))
+                  jammer-random-delay))
+    (discard-input)))
 
 ;;;###autoload
 (define-minor-mode jammer-mode

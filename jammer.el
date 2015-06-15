@@ -42,7 +42,8 @@
 (defcustom jammer-lighter " ^_^"
   "Lighter for `jammer-mode'."
   :type 'string
-  :group 'jammer)
+  :group 'jammer
+  :risky t)
 
 (defcustom jammer-block-type 'whitelist
   "Block list type for `jammer-block-list'.

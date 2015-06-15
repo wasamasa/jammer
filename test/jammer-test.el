@@ -28,8 +28,7 @@
   (it "should not do anything for an unknown type of `jammer-type' and return nil."
     (let ((jammer-type 'unknown))
       (expect (jammer)
-              :not :to-be-truthy)))
-  )
+              :not :to-be-truthy))))
 
 (describe "The `jammer-block-list' variable"
   (let (jammer-type)

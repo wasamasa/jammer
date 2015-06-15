@@ -210,7 +210,7 @@ and `jammer-random-delay' for tunables."
   (when (= (random (floor (/ 1 (min jammer-random-maximum-probability
                                     (max jammer-random-minimum-probability
                                          jammer-random-probability))))) 0)
-    (jammer-delay (* (random (1+ jammer-random-amplification))
+    (jammer-delay (* (1+ (random jammer-random-amplification))
                      jammer-random-delay))))
 
 (defun jammer-delay (time)

@@ -38,10 +38,10 @@ quadratic, the latter two types increase the delay time depending on
 the repetition count.
 
 Asides from the ``repeat`` type, there's also the option to constantly
-slow down all events (for input lag emulation) or slowing down
-randomly selected events by a random amount, an effect most comparable
-to having spilt a small amount of a sticky liquid on your keyboard.
-These can be enabled by customizing ``jammer-type``.
+slow down all events (for input lag emulation) or misfiring and
+slowing down randomly selected events by a random amount, an effect
+most comparable to having spilt a small amount of a sticky liquid on
+your keyboard.  These can be enabled by customizing ``jammer-type``.
 
 Finally, one can whitelist or blacklist commands.  By default an empty
 whitelist is used.  Adding a command to ``jammer-block-list`` in this

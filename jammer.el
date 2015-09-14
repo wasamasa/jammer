@@ -34,6 +34,9 @@
 
 ;;; Code:
 
+
+;; variables
+
 (defgroup jammer nil
   "Punish yourself for using Emacs inefficiently"
   :group 'games
@@ -67,7 +70,7 @@ The behaviour is set by `jammer-block-type'."
 
 'constant: Slow everything down.
 
-'random: Slow down randomly."
+'random: Slow down or misfire randomly."
   :type '(choice (const :tag "Repeat" repeat)
                  (const :tag "Constant" constant)
                  (const :tag "Random" random))
@@ -125,17 +128,23 @@ Applies to a value of 'random for `jammer-repeat-type'."
   :type 'float
   :group 'jammer)
 
-(defcustom jammer-random-probability 0.2
-  "Probability for a slowdown to happen.
+(defcustom jammer-random-probability 0.05
+  "Probability for a random action to happen.
 It has to be a floating point number between 0 and 1."
   :type 'float
   :group 'jammer)
 
+(defcustom jammer-random-slowdown-probability 0.5
+  "Probability for the random action to be a slowdown.
+It has to be a floating point number between 0 and 1.  The other
+allowed action is misfiring, this simply repeats the events
+making up the current command.")
+
 (defvar jammer-random-minimum-probability 0.01
-  "Minimum allowed probability for a slowdown.")
+  "Minimum allowed probability for a random action.")
 
 (defvar jammer-random-maximum-probability 1.0
-  "Maximum allowed probability for a slowdown.")
+  "Maximum allowed probability for a random action.")
 
 (defcustom jammer-random-amplification 10
   "Amplification span of the random delay.
@@ -143,6 +152,37 @@ The base delay can be amplified with a random factor up to this
 value."
   :type 'integer
   :group 'jammer)
+
+
+;; helpers
+
+(defun jammer-toss (p)
+  "Given probability P, do a toss.
+If the toss is successful, return t, otherwise nil.  P must be a
+floating point number between 0 and 1, values outside this
+range are clamped to 0 or 1."
+  (cond
+   ((>= p 1) t)
+   ((<= p 0) nil)
+   (t (if (= (random (round (/ 1 p))) 0)
+          t
+        nil))))
+
+(defun jammer-delay (time)
+  "Sleep for TIME, discard any input made in that time.
+Returns a truthy value after sleep."
+  (sleep-for time)
+  (discard-input)
+  t)
+
+(defun jammer-misfire ()
+  "Repeat events used to invoke the current command."
+  (let ((events (this-command-keys-vector)))
+    (dotimes (i (length events))
+      (push (aref events i) unread-command-events))))
+
+
+;; main
 
 (defun jammer ()
   "Slow down command execution.
@@ -204,22 +244,17 @@ See `jammer-constant-delay' for the tunable."
   (jammer-delay jammer-constant-delay))
 
 (defun jammer-random ()
-  "Jam for a random time.
-See `jammer-random-probability', `jammer-random-amplification'
-and `jammer-random-delay' for tunables."
+  "Jam for a random time or misfire.
+See `jammer-random-probability',
+`jammer-random-slowdown-probability',
+`jammer-random-amplification' and `jammer-random-delay' for
+tunables."
   ;; this function simulates a rare event, then amplifies it randomly
-  (when (= (random (floor (/ 1 (min jammer-random-maximum-probability
-                                    (max jammer-random-minimum-probability
-                                         jammer-random-probability))))) 0)
-    (jammer-delay (* (1+ (random jammer-random-amplification))
-                     jammer-random-delay))))
-
-(defun jammer-delay (time)
-  "Sleep for TIME, discard any input made in that time.
-Returns a truthy value after sleep."
-  (sleep-for time)
-  (discard-input)
-  t)
+  (when (jammer-toss jammer-random-probability)
+    (if (jammer-toss jammer-random-slowdown-probability)
+        (jammer-delay (* (1+ (random jammer-random-amplification))
+                         jammer-random-delay))
+      (jammer-misfire))))
 
 ;;;###autoload
 (define-minor-mode jammer-mode

@@ -35,18 +35,12 @@
 ;;; Code:
 
 
-;; variables
+;;; variables
 
 (defgroup jammer nil
   "Punish yourself for using Emacs inefficiently"
   :group 'games
   :prefix "jammer-")
-
-(defcustom jammer-lighter " ^_^"
-  "Lighter for `jammer-mode'."
-  :type 'string
-  :group 'jammer
-  :risky t)
 
 (defcustom jammer-block-type 'whitelist
   "Block list type for `jammer-block-list'.
@@ -154,7 +148,7 @@ value."
   :group 'jammer)
 
 
-;; helpers
+;;; helpers
 
 (defun jammer-toss (p)
   "Given probability P, do a toss.
@@ -182,7 +176,7 @@ Returns a truthy value after sleep."
       (push (aref events i) unread-command-events))))
 
 
-;; main
+;;; frontend
 
 (defun jammer ()
   "Slow down command execution.
@@ -261,7 +255,6 @@ tunables."
   "Toggle `jammer-mode'.
 This global minor mode allows you to slow down command execution
 globally in Emacs."
-  :lighter jammer-lighter
   :global t
   (if jammer-mode
       (add-hook 'post-command-hook 'jammer)

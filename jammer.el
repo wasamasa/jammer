@@ -171,9 +171,9 @@ Returns a truthy value after sleep."
 
 (defun jammer-misfire ()
   "Repeat events used to invoke the current command."
-  (let ((events (this-command-keys-vector)))
-    (dotimes (i (length events))
-      (push (aref events i) unread-command-events))))
+  (setq unread-command-events
+        (append (listify-key-sequence (this-command-keys-vector))
+                unread-command-events)))
 
 
 ;;; frontend
